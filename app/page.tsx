@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { NewsContainer } from '@/components/NewsContainer';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -23,29 +24,56 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center p-6 md:p-12 bg-background text-foreground">
-      <div className="z-10 w-full max-w-5xl flex flex-col items-center gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="text-center space-y-4 pt-8">
-          <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent pb-2">
-            Choose Your Topic
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select a category below to have our AI agent gather and present the latest stories.
-          </p>
-        </div>
+    <main className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <motion.div
+          className="text-center space-y-6 mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.h1
+            className="text-5xl md:text-7xl font-bold text-foreground tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Choose Your Tech Topic
+          </motion.h1>
+          <motion.p
+            className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            Select a technology category below to have our AI agent gather and present the latest stories in an engaging, natural way.
+          </motion.p>
+        </motion.div>
 
-        <CategoryGrid 
-            selectedCategory={selectedCategory} 
-            onSelect={handleSelectCategory} 
-        />
+        <motion.div
+          className="flex justify-center mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <CategoryGrid
+            selectedCategory={selectedCategory}
+            onSelect={handleSelectCategory}
+          />
+        </motion.div>
 
-        <div className="w-full mt-4">
-            <NewsContainer 
-                category={selectedCategory}
-                isFetching={isFetching}
-                onFetch={handleFetchNews}
-            />
-        </div>
+        <motion.div
+          className="max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+        >
+          <NewsContainer
+            category={selectedCategory}
+            isFetching={isFetching}
+            onFetch={handleFetchNews}
+          />
+        </motion.div>
       </div>
     </main>
   );

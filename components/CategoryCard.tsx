@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface CategoryCardProps {
   id: string;
@@ -11,29 +12,38 @@ interface CategoryCardProps {
 
 export function CategoryCard({ id, title, icon: Icon, isSelected, onClick }: CategoryCardProps) {
   return (
-    <button
+    <motion.button
       onClick={() => onClick(id)}
+      whileHover={{ y: -2, scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
       className={cn(
-        "group relative flex flex-col items-center justify-center gap-4 rounded-xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-        "bg-card text-card-foreground",
-        isSelected 
-          ? "border-primary ring-2 ring-primary/50 shadow-md shadow-primary/10" 
-          : "border-border hover:border-primary/50 hover:bg-accent/5"
+        "group relative flex flex-col items-center justify-center gap-4 rounded-2xl p-6 transition-all duration-300 min-h-[140px] w-full cursor-pointer",
+        "bg-card text-card-foreground shadow-sm hover:shadow-lg border",
+        isSelected
+          ? "border-primary bg-primary/5 shadow-md"
+          : "border-border hover:border-primary/50"
       )}
     >
-      <div className={cn(
-        "flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/50 transition-colors duration-300 group-hover:bg-primary/20",
-        isSelected && "bg-primary/20"
-      )}>
+      <motion.div
+        className={cn(
+          "flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300",
+          isSelected
+            ? "bg-primary"
+            : "bg-secondary group-hover:bg-primary/10"
+        )}
+        whileHover={{ scale: 1.1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      >
         <Icon className={cn(
-          "h-6 w-6 text-muted-foreground transition-colors duration-300 group-hover:text-primary",
-          isSelected && "text-primary"
+          "h-6 w-6 transition-colors duration-300",
+          isSelected ? "text-white" : "text-muted-foreground group-hover:text-primary"
         )} />
-      </div>
+      </motion.div>
       <span className={cn(
-        "font-semibold transition-colors duration-300",
+        "text-base font-medium transition-colors duration-300 text-center",
         isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
       )}>{title}</span>
-    </button>
+    </motion.button>
   );
 }
