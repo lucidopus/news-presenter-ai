@@ -14,13 +14,39 @@ export default function Home() {
     setIsFetching(false); // Reset if changing category
   };
 
-  const handleFetchNews = () => {
+  interface PresentationData {
+    script: string;
+    sources: { title: string; url: string; source: string }[];
+  }
+
+  const [presentation, setPresentation] = useState<PresentationData | null>(null);
+
+  const handleFetchNews = async () => {
+    if (!selectedCategory) return;
+    
     setIsFetching(true);
-    // Mock simulation of API call
-    setTimeout(() => {
-        setIsFetching(false);
-        // eventually sets a "success" state, but for now just stops loading
-    }, 3000);
+    setPresentation(null);
+    
+    try {
+      const response = await fetch('/api/generate-news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: selectedCategory }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPresentation(data);
+      } else {
+        console.error('Failed to fetch news:', data.error);
+        // Handle error state gracefully in UI (could add error state later)
+      }
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    } finally {
+      setIsFetching(false);
+    }
   };
 
   return (
@@ -72,6 +98,7 @@ export default function Home() {
             category={selectedCategory}
             isFetching={isFetching}
             onFetch={handleFetchNews}
+            presentation={presentation}
           />
         </motion.div>
       </div>
