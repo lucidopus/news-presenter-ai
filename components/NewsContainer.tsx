@@ -3,21 +3,35 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { AvatarPlayer } from './AvatarPlayer';
-import { NewsPresentation } from '@/lib/agent';
+
+export interface NewsPresentation {
+    script: string;
+    sources: { title: string; url: string; source: string }[];
+}
 
 interface NewsContainerProps {
   category: string | null;
-  isFetching: boolean;
-  onFetch: () => void;
-  presentation: NewsPresentation | null;
+  loading?: boolean;
+  script?: string;
+  sources?: { title: string; url: string; source: string }[];
+  presentationData?: any; // For legacy or future expansion
+  error?: string | null;
+  onGenerate?: () => void; // Optional now
 }
 
-export function NewsContainer({ category, isFetching, onFetch, presentation }: NewsContainerProps) {
-  // Cycling loading text - Top Level
+export function NewsContainer({ 
+    category, 
+    loading = false, 
+    script,
+    sources,
+    onGenerate 
+}: NewsContainerProps) {
+  
+  // Cycling loading text
   const [loadingText, setLoadingText] = useState('Gathering the latest updates...');
   
   useEffect(() => {
-    if (!isFetching || !category) return;
+    if (!loading || !category) return;
     
     const texts = [
         `Scanning global news sources for ${category}...`,
@@ -26,19 +40,17 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
         `Preparing AI news anchor...`
     ];
     let i = 0;
-    
-    // Set initial
     setLoadingText(texts[0]);
 
     const interval = setInterval(() => {
         i++;
         setLoadingText(texts[i % texts.length]);
-    }, 2000); // Change every 2 seconds
+    }, 2000);
     
     return () => clearInterval(interval);
-  }, [isFetching, category]);
+  }, [loading, category]);
 
-  // Dynamic subtle background color based on category (simple hash)
+  // Dynamic background
   const getCategoryColor = (cat: string) => {
       const colors = ['bg-blue-500/5', 'bg-purple-500/5', 'bg-emerald-500/5', 'bg-orange-500/5'];
       return colors[cat.length % colors.length];
@@ -46,7 +58,6 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
 
   const bgClass = category ? getCategoryColor(category) : 'bg-card';
 
-  // Toggle Transcript
   const [showTranscript, setShowTranscript] = useState(false);
 
   // -- Render Logic --
@@ -74,6 +85,9 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
     );
   }
 
+  // Determine if we have content to show
+  const hasContent = !!(script && sources);
+
   return (
     <motion.div
       className={cn("w-full flex flex-col gap-8 p-6 rounded-3xl transition-colors duration-500", bgClass)}
@@ -88,26 +102,28 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
            </h2>
            <p className="text-muted-foreground mt-1">Briefly AI &bull; Latest Updates</p>
         </div>
-        <button
-          onClick={onFetch}
-          disabled={isFetching}
-          className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
-        >
-          {isFetching ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Thinking...
-            </span>
-          ) : (
-            'Refresh Briefing'
-          )}
-        </button>
+        {onGenerate && (
+            <button
+            onClick={onGenerate}
+            disabled={loading}
+            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+            >
+            {loading ? (
+                <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Thinking...
+                </span>
+            ) : (
+                'Refresh Briefing'
+            )}
+            </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content Area (Video/Script) */}
         <div className="lg:col-span-2">
-          {isFetching ? (
+          {loading ? (
             <motion.div 
                className="h-[400px] bg-background/50 rounded-3xl flex flex-col items-center justify-center border border-border/50 gap-6 backdrop-blur-sm"
                initial={{ opacity: 0 }}
@@ -128,7 +144,7 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
                 {loadingText}
               </motion.p>
             </motion.div>
-          ) : presentation ? (
+          ) : hasContent ? (
              <motion.div
                initial={{ opacity: 0, scale: 0.98 }}
                animate={{ opacity: 1, scale: 1 }}
@@ -136,7 +152,7 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
              >
                 {/* Avatar Player */}
                 <div className="rounded-3xl overflow-hidden shadow-2xl border border-border/50 ring-1 ring-white/10">
-                   <AvatarPlayer script={presentation.script} />
+                   <AvatarPlayer script={script} />
                 </div>
                 
                 {/* Toggle Transcript */}
@@ -157,7 +173,7 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
                         className="p-6 bg-card/80 backdrop-blur-sm rounded-3xl border border-border/50"
                     >
                         <p className="text-lg leading-relaxed text-foreground/90 font-medium">
-                            {presentation.script}
+                            {script}
                         </p>
                     </motion.div>
                 )}
@@ -178,9 +194,9 @@ export function NewsContainer({ category, isFetching, onFetch, presentation }: N
               Sources
             </h3>
             
-            {presentation ? (
+            {sources ? (
               <ul className="space-y-4">
-                {presentation.sources.map((source, idx) => (
+                {sources.map((source, idx) => (
                   <motion.li 
                     key={idx}
                     initial={{ opacity: 0, x: 20 }}
